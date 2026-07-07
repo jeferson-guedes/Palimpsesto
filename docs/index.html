@@ -235,13 +235,14 @@ human-readable, no migration story. Parsed at boot; no DB dependency.
   <div class="wrap">
     <h2>Quickstart</h2>
     <h3>Clone and wire it in</h3>
-    <p><code>setup.sh</code> is pure Bash — zero dependencies. It links the skill into your agents and, optionally, scaffolds a memory directory.</p>
+    <p><code>setup.sh</code> links the skill into your agents and provisions the semantic engine (a local Python venv with ChromaDB — the engine <em>is</em> the tool). It can also scaffold a memory directory.</p>
     <pre><code>git clone git@github.com:jeferson-guedes/Palimpsesto.git
 cd Palimpsesto
 
-./setup.sh                       # wire the skill into your agents (~/.claude, ~/.codex)
+./setup.sh                       # wire the skill + set up the semantic engine
 ./setup.sh ~/my-project/memory   # also scaffold a memory dir for a project
-./setup.sh --semantic            # also set up the optional semantic layer</code></pre>
+./setup.sh --no-semantic         # files only — skip the engine (needs Python otherwise)
+./setup.sh --uninstall           # remove the skill links and the engine's venv</code></pre>
     <p style="margin-top:18px">From there it's just Markdown. Point your agent at <a href="https://github.com/jeferson-guedes/Palimpsesto/blob/main/PALIMPSESTO.md"><code>PALIMPSESTO.md</code></a> — the contract — and it learns the rest.</p>
   </div>
 </section>

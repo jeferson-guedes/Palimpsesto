@@ -62,10 +62,12 @@ cd Palimpsesto
 Setup provisions the semantic engine by default (it needs Python 3). Pass
 `--no-semantic` for the files-only case.
 
-`setup.sh` is pure Bash — **zero dependencies**. It:
+`setup.sh` does three things:
 
 - links the `palimpsesto` skill into every agent config it finds, so the agent
   learns the convention once and applies it everywhere;
+- provisions the semantic engine — a Python venv with ChromaDB (the engine is
+  what makes this memory, not just notes; skip with `--no-semantic`);
 - scaffolds a `memory/` directory (with a seed `MEMORY.md`) when you pass a path.
 
 From there it is just Markdown. Read and write the files with your editor, your

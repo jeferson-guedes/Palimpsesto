@@ -5,13 +5,15 @@
 > rewritten in place, but the reasoning behind it is never erased — it stays
 > readable underneath.
 
-This file is the contract. Any coding agent learns how the memory works just by
-reading it. The memory itself is plain Markdown that lives with the project and
-outlives every session.
+This file is the contract for the **durable layer** — the source of truth. Any
+coding agent learns how memory is written just by reading it. The memory itself
+is plain Markdown that lives with the project and outlives every session.
 
-Palimpsesto is convention-first: there is no CLI and no runtime to stand up. The
-correctness comes from a habit the agent follows, not from tooling. (A helper
-script is optional and lives outside this contract.)
+Writing is convention-first: there is no CLI to hand-edit a memory. Correctness
+comes from a habit the agent follows, not from tooling. Recall is a separate,
+core concern handled by the semantic engine (local ChromaDB + a synaptic graph)
+— see `semantic/`. The files hold the truth; the engine is what makes them
+*memory* rather than notes. This contract governs the files.
 
 ## What belongs in memory
 
