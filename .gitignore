@@ -3,9 +3,10 @@ memory/
 *.local.md
 .DS_Store
 
-# Semantic layer: local databases and venv are yours, never committed.
+# Semantic layer: local databases, venv, and domain overrides are yours, never committed.
 semantic/data/
 semantic/.venv/
 semantic/.last_maintenance
+semantic/tags.local.json
 __pycache__/
 *.pyc

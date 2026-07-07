@@ -186,6 +186,21 @@ TAG_PATTERNS = {
     "decision": r"decid|chose|escolh|trade-?off|instead of|rather than|approach",
 }
 
+# Optional local override: drop a `semantic/tags.local.json` — a flat
+# {"tag": "regex", ...} map — to replace the defaults above with your project's
+# own vocabulary (product names, subsystems, services). It is git-ignored and
+# never published, so the public repo stays generic while your install stays
+# domain-tuned.
+_LOCAL_TAGS = os.path.join(_SCRIPT_DIR, "tags.local.json")
+if os.path.exists(_LOCAL_TAGS):
+    try:
+        with open(_LOCAL_TAGS) as _f:
+            _override = json.load(_f)
+        if isinstance(_override, dict) and _override:
+            TAG_PATTERNS = {str(k): str(v) for k, v in _override.items()}
+    except Exception as _e:
+        print(f"palimpsesto tags.local.json error: {_e}", file=sys.stderr)
+
 # Trivial patterns — skip saving if the whole turn matches
 TRIVIAL_PATTERNS = [
     r"^(?:ok|sim|nao|não|yes|no|certo|entendi|beleza|show|valeu|obrigado|thanks)[\.\!\?]?$",

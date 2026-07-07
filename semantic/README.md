@@ -93,6 +93,22 @@ In `~/.claude/settings.json`, so recall and auto-save happen automatically:
 .venv/bin/python seed_from_memory.py /path/to/your/memory         # write
 ```
 
+## Customize the auto-save tags
+
+`hook_autosave.py` tags each saved memory using a generic set of dev patterns.
+To teach it your project's vocabulary (product names, subsystems, services),
+drop a `semantic/tags.local.json` — a flat `{"tag": "regex", ...}` map — and it
+replaces the defaults. The file is git-ignored, so your domain stays private
+while the public repo stays generic.
+
+```json
+{
+  "billing":  "invoice|charge|stripe|subscription",
+  "search":   "elasticsearch|\\bes\\b|index|query",
+  "payments": "pix|boleto|checkout|gateway"
+}
+```
+
 ## Data
 
 Everything persists under `semantic/data/` — `chroma.sqlite3` (vectors) and
