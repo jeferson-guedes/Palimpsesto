@@ -150,7 +150,7 @@
     <h2>The problem</h2>
     <p class="lead">You spend a session settling something real — why Markdown over SQLite, why option B is out, what <em>done</em> means for this version. The reasoning is good, the call is made.</p>
     <p>Then the session ends. Open a fresh one tomorrow, switch machines, move from one agent to another — and it asks the same questions again. The model isn't weak. It just never had anywhere durable to put the conclusion. The work survives as code; the <em>why</em> evaporates into a chat log nobody reopens.</p>
-    <p>Palimpsesto gives a project a durable memory: plain Markdown that lives in the repo and outlives every session. It is <strong>convention-first</strong> — nothing to stand up before you start, no runtime, no CLI required. An agent learns how it works by reading one file.</p>
+    <p>Palimpsesto gives a project a durable memory: plain Markdown that holds the truth, and a local engine — <strong>ChromaDB + a synaptic graph</strong> — that recalls it. On-device embeddings, no API calls, no vendor: it runs on your machine and lives in your repo. The writing is convention-first (no CLI to hand-edit memory); the recall is powered by the engine.</p>
   </div>
 </section>
 
@@ -200,25 +200,25 @@ human-readable, no migration story. Parsed at boot; no DB dependency.
 
 <section>
   <div class="wrap">
-    <h2>Two layers of memory</h2>
-    <h3>Durable files, plus recall</h3>
-    <p>The files are the source of truth. An optional semantic layer sits on top as an associative index — it answers <em>"didn't we discuss this before?"</em> even when you don't know which file it lives in.</p>
+    <h2>Two layers, one tool</h2>
+    <h3>Files hold the truth. The engine makes it memory.</h3>
+    <p>Neither half is an add-on. The files are the source of truth; the semantic engine is what turns a folder of Markdown into <em>recall</em> — it answers <em>"didn't we discuss this before?"</em> even when you don't know which file it lives in. Without the engine you have notes; with it you have memory.</p>
     <div class="layers">
       <div class="card">
-        <span class="pill">core</span>
+        <span class="pill">the truth</span>
         <h4 style="margin-top:10px">Durable files</h4>
-        <p class="role">The source of truth</p>
+        <p class="role">What is known</p>
         <ul>
           <li>Curated Markdown, <code>compiled_truth</code> + <code>timeline</code></li>
           <li>Index read every session</li>
           <li>Diffable in a PR, readable by a human or <code>grep</code></li>
-          <li>Stands alone — no dependencies</li>
+          <li>Written by convention — no CLI needed</li>
         </ul>
       </div>
       <div class="card">
-        <span class="pill">optional</span>
-        <h4 style="margin-top:10px">Semantic layer</h4>
-        <p class="role">Associative recall</p>
+        <span class="pill">the recall</span>
+        <h4 style="margin-top:10px">Semantic engine</h4>
+        <p class="role">How it's found again</p>
         <ul>
           <li>Local ChromaDB + on-device embeddings — zero API cost</li>
           <li>Similarity search, on demand</li>
@@ -227,7 +227,7 @@ human-readable, no migration story. Parsed at boot; no DB dependency.
         </ul>
       </div>
     </div>
-    <p class="muted" style="margin-top:18px; font-size:15px">Nothing leaves your machine, and no memory is ever committed to the repo. The store is plain files; any agent that can read them — or call an MCP tool — can use it.</p>
+    <p class="muted" style="margin-top:18px; font-size:15px">It all runs on your machine — nothing leaves it, no API calls, no vendor. The truth is plain files in git; the engine is local. The memory belongs to you, not to a model.</p>
   </div>
 </section>
 
@@ -250,7 +250,7 @@ cd Palimpsesto
   <div class="wrap">
     <h2>Not this</h2>
     <p><strong>A rules file (CLAUDE.md / AGENTS.md).</strong> Great for standing instructions. Palimpsesto is structured, addressable knowledge with an audit trail — a different job. Use both.</p>
-    <p><strong>A vector store or hosted memory.</strong> Those are runtimes over your knowledge. Palimpsesto is the substrate: plain files in git. Put a runtime on top if you want; the knowledge still belongs to the repo.</p>
+    <p><strong>A hosted memory service.</strong> A vendor's vector store or a model's built-in memory is a runtime you don't own. Palimpsesto's engine runs locally and its truth is plain files in git — the memory belongs to you, not to a model or a vendor.</p>
     <p><strong>Chat history.</strong> History is the process. A memory is the conclusion — the handful of judgments you'll need again.</p>
   </div>
 </section>

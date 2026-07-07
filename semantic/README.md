@@ -1,13 +1,15 @@
-# Palimpsesto — Semantic Layer
+# Palimpsesto — Semantic Engine
 
 The durable file layer (`PALIMPSESTO.md`) is the source of truth: curated
-Markdown you and the agent read and write deliberately. This is the **recall
-layer** on top of it — an associative index that surfaces relevant past context
-by *similarity*, without anyone having to remember which file it lives in.
+Markdown you and the agent read and write deliberately. This is the **engine
+that makes it memory** — an associative index that surfaces relevant past
+context by *similarity*, without anyone having to remember which file it lives
+in. It is not an add-on: a folder of Markdown without this is notes; with it,
+it's recall.
 
 Two layers, two jobs:
 
-| | Durable files | Semantic layer (this) |
+| | Durable files | Semantic engine (this) |
 |---|---|---|
 | Retrieval | index read every session | similarity search on demand |
 | Curation | deliberate, by hand/agent | automatic (hooks) + seeded from files |
@@ -47,7 +49,8 @@ python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt          # chromadb, mcp, pyyaml
 ```
 
-Or let the top-level installer do it: `./setup.sh --semantic`.
+Or let the top-level installer do it — it sets this up by default:
+`./setup.sh`.
 
 ### 1. Register the MCP server
 
