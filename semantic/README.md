@@ -98,16 +98,19 @@ In `~/.claude/settings.json`, so recall and auto-save happen automatically:
 `hook_autosave.py` tags each saved memory using a generic set of dev patterns.
 To teach it your project's vocabulary (product names, subsystems, services),
 drop a `semantic/tags.local.json` — a flat `{"tag": "regex", ...}` map — and it
-replaces the defaults. The file is git-ignored, so your domain stays private
-while the public repo stays generic.
+replaces the defaults. The file is **git-ignored**, so your domain vocabulary
+stays private and never reaches the repo.
 
 ```json
 {
-  "billing":  "invoice|charge|stripe|subscription",
-  "search":   "elasticsearch|\\bes\\b|index|query",
-  "payments": "pix|boleto|checkout|gateway"
+  "<tag-name>":     "<regex|matching|this|topic>",
+  "<another-tag>":  "keyword|synonym|abbrev"
 }
 ```
+
+Each key is a tag; each value is a case-insensitive regex. A memory gets the
+top-scoring tags by match count. Keep this file local — it describes what you
+work on.
 
 ## Data
 
