@@ -6,6 +6,7 @@
 # Usage:
 #   ./setup.sh                 # link the skill into detected agents
 #   ./setup.sh PATH            # ...and scaffold a memory dir at PATH
+#   ./setup.sh --semantic      # also set up the semantic layer (venv + deps)
 #   ./setup.sh --clean         # remove the linked skill from detected agents
 #   ./setup.sh -h | --help
 #
@@ -18,13 +19,15 @@ SKILL_SRC="$REPO_ROOT/skills/palimpsesto"
 AGENT_ROOTS=("$HOME/.claude" "$HOME/.codex")
 
 CLEAN=0
+SEMANTIC=0
 MEMORY_DIR=""
 
-usage() { sed -n '3,13p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0; }
+usage() { sed -n '3,14p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0; }
 
 for arg in "$@"; do
   case "$arg" in
     --clean) CLEAN=1 ;;
+    --semantic) SEMANTIC=1 ;;
     -h|--help) usage ;;
     -*) echo "unknown option: $arg" >&2; exit 2 ;;
     *) MEMORY_DIR="$arg" ;;
@@ -71,6 +74,22 @@ if [ -n "$MEMORY_DIR" ]; then
   else
     cp "$REPO_ROOT/templates/MEMORY.md" "$MEMORY_DIR/MEMORY.md"
     info "$MEMORY_DIR/MEMORY.md (seed index)"
+  fi
+fi
+
+# --- optionally set up the semantic layer -------------------------------------
+if [ "$SEMANTIC" -eq 1 ]; then
+  echo "Palimpsesto → semantic layer"
+  SEM="$REPO_ROOT/semantic"
+  PY="$(command -v python3 || true)"
+  if [ -z "$PY" ]; then warn "python3 not found — skipping semantic layer"; else
+    if [ ! -d "$SEM/.venv" ]; then "$PY" -m venv "$SEM/.venv"; info "created $SEM/.venv"; else skip ".venv already exists"; fi
+    "$SEM/.venv/bin/pip" install -q -r "$SEM/requirements.txt" && info "installed deps (chromadb, mcp, pyyaml)"
+    echo
+    echo "  Next, wire it up (see semantic/README.md for the full snippets):"
+    echo "    • register the MCP server:  command = $SEM/.venv/bin/python  args = [$SEM/server.py]"
+    echo "    • hooks (UserPromptSubmit → hook_retrieve.py, Stop → hook_autosave.py)"
+    [ -n "$MEMORY_DIR" ] && echo "    • seed from your files:     $SEM/.venv/bin/python $SEM/seed_from_memory.py $MEMORY_DIR"
   fi
 fi
 

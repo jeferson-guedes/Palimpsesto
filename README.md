@@ -29,13 +29,29 @@ edits.
 The full contract is in **[PALIMPSESTO.md](./PALIMPSESTO.md)** — point your agent
 at it.
 
+## Two layers
+
+Palimpsesto is the durable layer — but recall matters too. Ships with both:
+
+| Layer | What it is | Retrieval |
+|-------|-----------|-----------|
+| **Durable files** (core) | Curated Markdown, `compiled_truth` + `timeline`. The source of truth. | Index read every session. |
+| **[Semantic layer](./semantic/)** (optional) | Local ChromaDB + on-device embeddings + a Hebbian synaptic graph. Zero API cost. | Similarity search + spreading activation, on demand. |
+
+The files are the truth; the semantic layer is an associative index over them
+that answers *"didn't we discuss this before?"* even when you don't know which
+file it lives in. Co-retrieved memories **wire together** and drag their
+neighbors in on the next recall. Fully optional — the file layer stands alone.
+See **[semantic/README.md](./semantic/README.md)**.
+
 ## Quickstart
 
 ```sh
 git clone git@github.com:jeferson-guedes/Palimpsesto.git
 cd Palimpsesto
-./setup.sh                 # wire the skill into your agents (~/.claude, ~/.codex)
+./setup.sh                       # wire the skill into your agents (~/.claude, ~/.codex)
 ./setup.sh ~/my-project/memory   # also scaffold a memory dir for a project
+./setup.sh --semantic            # also set up the optional semantic layer (venv + deps)
 ```
 
 `setup.sh` is pure Bash — **zero dependencies**. It:
@@ -56,7 +72,8 @@ agent, or `grep`.
 | `templates/MEMORY.md` | Seed index. |
 | `templates/page.md` | Blank memory page (`compiled_truth` + `timeline`). |
 | `templates/page-example.md` | A worked example showing a reversal on the record. |
-| `setup.sh` | Wire skill into agents + scaffold a memory dir. |
+| `setup.sh` | Wire skill into agents + scaffold a memory dir + optional semantic setup. |
+| `semantic/` | Optional recall layer: local ChromaDB + embeddings + synaptic graph. |
 
 ## Not this
 
