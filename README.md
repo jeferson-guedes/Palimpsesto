@@ -7,11 +7,13 @@ option B is out, what *done* means. The session ends. Next time it asks the same
 questions. The work survives as code; the reasoning evaporates into a chat log.
 
 Palimpsesto is a **two-layer memory**: a durable Markdown substrate that holds
-the truth, and a local semantic engine — **ChromaDB + a Hebbian synaptic graph**
-— that recalls it. On-device embeddings, no API calls, no vendor, no lock-in:
-it all runs on your machine and lives in your repo. The write discipline is
-convention-first (no CLI to hand-edit memory); the recall is powered by the
-engine. Both halves are the tool.
+the truth, and a local semantic engine that recalls it. The engine is two stores
+working together — **ChromaDB** for the vectors (what *reads* like your query)
+and a **SQLite synaptic graph** for the associations (what fires *together*).
+On-device embeddings, no API calls, no vendor, no lock-in: it all runs on your
+machine and lives in your repo. The write discipline is convention-first (no CLI
+to hand-edit memory); the recall is powered by the engine. Both halves are the
+tool.
 
 > A *palimpsest* is a manuscript rewritten over an erased one, where the earlier
 > text still shows through. That is the design: the current understanding is
@@ -39,7 +41,7 @@ Neither half is an add-on — together they are what Palimpsesto *is*:
 | Layer | What it is | Retrieval |
 |-------|-----------|-----------|
 | **Durable files** | Curated Markdown, `compiled_truth` + `timeline`. The source of truth. | Index read every session. |
-| **[Semantic engine](./semantic/)** | Local ChromaDB + on-device embeddings + a Hebbian synaptic graph. Zero API cost. | Similarity search + spreading activation, on demand. |
+| **[Semantic engine](./semantic/)** | Local ChromaDB (vectors) + a SQLite Hebbian synaptic graph (associations). On-device embeddings, zero API cost. | Similarity search + spreading activation, on demand. |
 
 The files hold the truth; the semantic engine is what turns a folder of Markdown
 into *memory* — it answers *"didn't we discuss this before?"* even when you don't
@@ -66,8 +68,9 @@ Setup provisions the semantic engine by default (it needs Python 3). Pass
 
 - links the `palimpsesto` skill into every agent config it finds, so the agent
   learns the convention once and applies it everywhere;
-- provisions the semantic engine — a Python venv with ChromaDB (the engine is
-  what makes this memory, not just notes; skip with `--no-semantic`);
+- provisions the semantic engine — a Python venv with ChromaDB (vectors) and a
+  SQLite synaptic graph (associations); this engine is what makes it memory, not
+  just notes (skip with `--no-semantic`);
 - scaffolds a `memory/` directory (with a seed `MEMORY.md`) when you pass a path.
 
 From there it is just Markdown. Read and write the files with your editor, your
@@ -83,7 +86,7 @@ agent, or `grep`.
 | `templates/page.md` | Blank memory page (`compiled_truth` + `timeline`). |
 | `templates/page-example.md` | A worked example showing a reversal on the record. |
 | `setup.sh` | Wire skill into agents + set up the engine + scaffold a memory dir. |
-| `semantic/` | The recall engine: local ChromaDB + embeddings + synaptic graph. |
+| `semantic/` | The recall engine: local ChromaDB (vectors) + a SQLite synaptic graph (associations). |
 
 ## Not this
 

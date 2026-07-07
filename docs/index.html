@@ -150,7 +150,7 @@
     <h2>The problem</h2>
     <p class="lead">You spend a session settling something real — why Markdown over SQLite, why option B is out, what <em>done</em> means for this version. The reasoning is good, the call is made.</p>
     <p>Then the session ends. Open a fresh one tomorrow, switch machines, move from one agent to another — and it asks the same questions again. The model isn't weak. It just never had anywhere durable to put the conclusion. The work survives as code; the <em>why</em> evaporates into a chat log nobody reopens.</p>
-    <p>Palimpsesto gives a project a durable memory: plain Markdown that holds the truth, and a local engine — <strong>ChromaDB + a synaptic graph</strong> — that recalls it. On-device embeddings, no API calls, no vendor: it runs on your machine and lives in your repo. The writing is convention-first (no CLI to hand-edit memory); the recall is powered by the engine.</p>
+    <p>Palimpsesto gives a project a durable memory: plain Markdown that holds the truth, and a local engine that recalls it — <strong>ChromaDB</strong> for the vectors and a <strong>SQLite synaptic graph</strong> for the associations. On-device embeddings, no API calls, no vendor: it runs on your machine and lives in your repo. The writing is convention-first (no CLI to hand-edit memory); the recall is powered by the engine.</p>
   </div>
 </section>
 
@@ -220,10 +220,10 @@ human-readable, no migration story. Parsed at boot; no DB dependency.
         <h4 style="margin-top:10px">Semantic engine</h4>
         <p class="role">How it's found again</p>
         <ul>
-          <li>Local ChromaDB + on-device embeddings — zero API cost</li>
-          <li>Similarity search, on demand</li>
-          <li>A Hebbian synaptic graph: co-retrieved memories wire together</li>
-          <li>Spreading activation drags in relevant neighbors</li>
+          <li>ChromaDB + on-device embeddings — vectors, zero API cost</li>
+          <li>A SQLite Hebbian graph — co-retrieved memories wire together</li>
+          <li>Similarity search + spreading activation, on demand</li>
+          <li>All local — nothing leaves your machine</li>
         </ul>
       </div>
     </div>
@@ -235,7 +235,7 @@ human-readable, no migration story. Parsed at boot; no DB dependency.
   <div class="wrap">
     <h2>Quickstart</h2>
     <h3>Clone and wire it in</h3>
-    <p><code>setup.sh</code> links the skill into your agents and provisions the semantic engine (a local Python venv with ChromaDB — the engine <em>is</em> the tool). It can also scaffold a memory directory.</p>
+    <p><code>setup.sh</code> links the skill into your agents and provisions the semantic engine — a local Python venv with ChromaDB (vectors) and a SQLite synaptic graph (associations). The engine <em>is</em> the tool. It can also scaffold a memory directory.</p>
     <pre><code>git clone git@github.com:jeferson-guedes/Palimpsesto.git
 cd Palimpsesto
 

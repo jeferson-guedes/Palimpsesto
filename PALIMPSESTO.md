@@ -11,9 +11,10 @@ is plain Markdown that lives with the project and outlives every session.
 
 Writing is convention-first: there is no CLI to hand-edit a memory. Correctness
 comes from a habit the agent follows, not from tooling. Recall is a separate,
-core concern handled by the semantic engine (local ChromaDB + a synaptic graph)
-— see `semantic/`. The files hold the truth; the engine is what makes them
-*memory* rather than notes. This contract governs the files.
+core concern handled by the semantic engine (local ChromaDB for vectors + a
+SQLite synaptic graph for associations) — see `semantic/`. The files hold the
+truth; the engine is what makes them *memory* rather than notes. This contract
+governs the files.
 
 ## What belongs in memory
 
