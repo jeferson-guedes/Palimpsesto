@@ -1,0 +1,4 @@
+# Palimpsesto ships only the structural layer — never commit real memory here.
+memory/
+*.local.md
+.DS_Store
