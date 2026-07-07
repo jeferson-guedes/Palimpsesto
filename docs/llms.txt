@@ -1,0 +1,123 @@
+# Palimpsesto
+
+> Project memory for coding agents that never erases the *why*. Durable Markdown
+> holds the truth; a local semantic engine (ChromaDB + a SQLite synaptic graph)
+> recalls it. If you are an AI agent working in a project that uses Palimpsesto,
+> this file teaches you everything needed to set it up and operate it.
+
+Palimpsesto is two layers, and **both are the tool**:
+
+1. **Durable files** — curated Markdown under a `memory/` directory, indexed by
+   `MEMORY.md`. Each memory that evolves carries `compiled_truth` (rewritable)
+   and `timeline` (append-only). This is the source of truth.
+2. **Semantic engine** (`semantic/`) — a local ChromaDB vector store + a SQLite
+   Hebbian synaptic graph. It runs on-device (zero API cost, no vendor) and is
+   what turns a folder of notes into *recall*. It is not optional.
+
+Golden rule: **never overwrite a conclusion silently.** When understanding
+changes, rewrite `compiled_truth` AND append a `reversal` line to `timeline`,
+together — so the reasoning behind a change of mind stays on the record.
+
+## Setup (do this once, in order)
+
+1. Install the skill + engine:
+   ```sh
+   ./setup.sh                 # links the skill into ~/.claude, ~/.codex; builds semantic/.venv with deps
+   ./setup.sh ~/proj/memory   # ...and scaffolds a memory dir (PALIMPSESTO.md, _TEMPLATE.md, MEMORY.md)
+   ```
+   Requires Python 3 for the engine. Deps: `chromadb`, `mcp`, `pyyaml`.
+
+2. Register the MCP server so `save_context` / `search_context` / `strengthen_synapses`
+   are callable. Add to `~/.claude.json` (or a project `.mcp.json`):
+   ```json
+   { "mcpServers": { "memory": {
+       "command": "/ABS/PATH/semantic/.venv/bin/python",
+       "args": ["/ABS/PATH/semantic/server.py"] } } }
+   ```
+
+3. Wire the hooks so recall + capture happen automatically (`~/.claude/settings.json`):
+   ```json
+   { "hooks": {
+       "UserPromptSubmit": [ { "hooks": [ { "type": "command",
+         "command": "/ABS/PATH/semantic/.venv/bin/python /ABS/PATH/semantic/hook_retrieve.py" } ] } ],
+       "Stop": [ { "hooks": [ { "type": "command",
+         "command": "/ABS/PATH/semantic/.venv/bin/python /ABS/PATH/semantic/hook_autosave.py" } ] } ] } }
+   ```
+   - `hook_retrieve.py` (UserPromptSubmit): vector search + synaptic neighbors, injected into your context before you answer.
+   - `hook_autosave.py` (Stop): distills the last turns into a compact memory and saves it; also runs light maintenance ~1×/day.
+
+4. Seed the engine from the durable files so curated memory is searchable:
+   ```sh
+   semantic/.venv/bin/python semantic/seed_from_memory.py /ABS/PATH/memory --dry   # preview
+   semantic/.venv/bin/python semantic/seed_from_memory.py /ABS/PATH/memory         # write
+   ```
+
+## Writing a memory (the durable layer)
+
+Create one file per durable unit of knowledge under `memory/`. Frontmatter:
+
+```
+---
+name: <kebab-case-slug>
+description: <one-line summary used for recall>
+metadata:
+  type: user | feedback | project | reference
+---
+```
+
+- `user` / `reference` are stable — a plain body is enough.
+- `project` / `feedback` evolve — use the two-layer body:
+  ```
+  # <title>
+  ## compiled_truth
+  <current best understanding — rewrite this whole section as it improves>
+  ## timeline
+  - <YYYY-MM-DD> · <kind> · <one line> [· source: <origin>]
+  **Why:** <reasoning>
+  **How to apply:** <what to do with this>
+  ```
+- `kind` ∈ `decision | reversal | hypothesis | finding | milestone | correction`.
+- Add ONE pointer line to `MEMORY.md`: `- [Title](file.md) — one-line hook`.
+  `MEMORY.md` holds pointers only, never content; it is read every session.
+- Link related memories with `[[name]]` (another file's `name:` slug).
+- The test for what belongs: *"Will this still matter in months, and is it hard
+  to reconstruct from the code?"* Yes → write it. No → leave it in code.
+
+## Recall (the semantic engine)
+
+- **Automatic:** with the hooks wired, relevant memories are injected at the
+  start of each turn under a `[semantic-memory]` block; substantial turns are
+  auto-saved on Stop. You do not call anything by hand for this.
+- **Manual (MCP tools):** available via the `memory` server —
+  - `save_context(content, tags?, source?, session_id?, role?)` — store a distilled insight (prefer summaries over raw text).
+  - `search_context(query, n_results?, min_score?, source?, tags?)` — semantic search.
+  - `strengthen_synapses(memory_ids, delta?)` — after using 2+ memories together, wire them so spreading activation surfaces them together next time.
+  - `list_sources()` / `synapse_stats()` — introspection. `delete_context(doc_id)` — remove one.
+- **Spreading activation:** a strong vector hit pulls in its synaptic neighbors,
+  so relationally-relevant context surfaces even when it isn't textually similar.
+  Co-retrieved memories auto-strengthen; unused links decay and get pruned daily.
+
+## Operating rules (do / don't)
+
+- DO capture decisions and corrections the moment they surface, not at the end.
+- DO append a `reversal`/`correction` to `timeline` when a past call is overturned; never delete the old reasoning.
+- DO retrofit the `compiled_truth` + `timeline` shape into a file the next time you touch it — never rewrite history in bulk.
+- DO treat a memory as point-in-time: if it cites a file/line/value, verify against current code before asserting it as fact.
+- DON'T commit real memory to the Palimpsesto repo — `memory/`, `semantic/data/`, `semantic/.venv/` are git-ignored.
+- DON'T store secrets or credentials in memory files or the semantic store.
+- DON'T put memory content in `MEMORY.md` — pointers only.
+
+## File map
+
+- `PALIMPSESTO.md` — the durable-layer contract (read this to learn the memory format).
+- `templates/` — `MEMORY.md` (index seed), `page.md` (blank), `page-example.md` (worked reversal).
+- `skills/palimpsesto/SKILL.md` — the install-once skill teaching the convention.
+- `semantic/` — the engine: `server.py` (MCP), `synapses.py` (SQLite graph), `hook_retrieve.py`, `hook_autosave.py`, `maintenance.py`, `sleep_cycle.py`, `seed_from_memory.py`.
+- `setup.sh` — installer; `--no-semantic` (files only), `--uninstall` (`--purge` also deletes data).
+
+## Reference
+
+- [PALIMPSESTO.md](https://github.com/jeferson-guedes/Palimpsesto/blob/main/PALIMPSESTO.md): the durable-layer contract in full.
+- [semantic/README.md](https://github.com/jeferson-guedes/Palimpsesto/blob/main/semantic/README.md): the engine, install, and wiring in detail.
+- [README.md](https://github.com/jeferson-guedes/Palimpsesto/blob/main/README.md): overview and quickstart.
+- Credit: adapts `compiled_truth` + append-only `timeline` from [brain.md](https://github.com/mindmuxai/brain.md) (MindMux), kept as a convention.

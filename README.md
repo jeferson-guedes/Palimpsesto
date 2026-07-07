@@ -32,7 +32,8 @@ That single habit is what stops a knowledge base from rotting through silent
 edits.
 
 The full contract is in **[PALIMPSESTO.md](./PALIMPSESTO.md)** — point your agent
-at it.
+at it. For a single operational runbook an agent can follow end-to-end (install,
+wire, operate), see **[llms.txt](./llms.txt)**.
 
 ## Two layers, one tool
 
