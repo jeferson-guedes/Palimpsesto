@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Palimpsesto — project memory for coding agents</title>
+<meta name="description" content="An open standard for project memory: plain Markdown your coding agent reads and writes, where the current understanding is rewritten in place but the reasoning behind it is never erased.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪶</text></svg>">
+<style>
+  :root {
+    --bg: #f6f1e7;
+    --bg-2: #efe7d6;
+    --panel: #fffdf8;
+    --ink: #2b2622;
+    --ink-soft: #5c554c;
+    --faint: #8a8073;
+    --rule: #e2d8c4;
+    --accent: #8a2b1f;
+    --accent-soft: #b9543f;
+    --mono-bg: #f2ead9;
+    --shadow: 0 1px 2px rgba(43,38,34,.06), 0 8px 24px rgba(43,38,34,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17140f;
+      --bg-2: #1e1a14;
+      --panel: #211c15;
+      --ink: #ece4d4;
+      --ink-soft: #b8ad99;
+      --faint: #8a7f6c;
+      --rule: #362f24;
+      --accent: #e0846d;
+      --accent-soft: #c9583f;
+      --mono-bg: #2a2318;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 17px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .serif { font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, pre, kbd { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+  code { background: var(--mono-bg); padding: .12em .38em; border-radius: 4px; font-size: .88em; }
+  pre {
+    background: var(--mono-bg); border: 1px solid var(--rule); border-radius: 10px;
+    padding: 16px 18px; overflow-x: auto; font-size: 14px; line-height: 1.55;
+  }
+  pre code { background: none; padding: 0; }
+
+  /* ---- hero ---- */
+  header.hero {
+    position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--rule);
+    background: linear-gradient(180deg, var(--bg-2), var(--bg));
+  }
+  .palimpsest-bg {
+    position: absolute; inset: 0; pointer-events: none;
+    font-family: Georgia, serif; color: var(--ink);
+    opacity: .035; font-size: 15px; line-height: 1.5;
+    padding: 20px; letter-spacing: .3px; transform: rotate(-4deg) scale(1.25);
+    white-space: pre-wrap; word-break: break-word;
+  }
+  @media (prefers-color-scheme: dark) { .palimpsest-bg { opacity: .05; } }
+  .hero .wrap { position: relative; padding-top: 74px; padding-bottom: 64px; }
+  .feather { font-size: 34px; line-height: 1; }
+  h1.title {
+    font-weight: 700; font-size: clamp(44px, 9vw, 76px); letter-spacing: -.5px;
+    margin: 14px 0 6px; line-height: .98;
+  }
+  .tagline { font-size: clamp(19px, 3.4vw, 23px); color: var(--ink-soft); margin: 0 0 8px; max-width: 30ch; }
+  .metaphor {
+    font-style: italic; color: var(--faint); border-left: 3px solid var(--accent);
+    padding-left: 16px; margin: 26px 0 30px; max-width: 54ch;
+  }
+  .cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .btn {
+    display: inline-block; background: var(--accent); color: #fff;
+    padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 15px;
+  }
+  .btn:hover { background: var(--accent-soft); text-decoration: none; }
+  .btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--rule); }
+
+  /* ---- sections ---- */
+  section { padding: 54px 0; border-bottom: 1px solid var(--rule); }
+  section.tight { padding: 44px 0; }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .11em; color: var(--accent); margin: 0 0 18px; font-weight: 700; }
+  h3 { font-size: 26px; letter-spacing: -.3px; margin: 0 0 12px; line-height: 1.15; }
+  p { margin: 0 0 16px; }
+  .lead { font-size: 20px; color: var(--ink-soft); }
+  .muted { color: var(--faint); }
+
+  /* ---- two-layer diagram ---- */
+  .layers { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
+  @media (max-width: 620px) { .layers { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--panel); border: 1px solid var(--rule); border-radius: 12px;
+    padding: 20px; box-shadow: var(--shadow);
+  }
+  .card h4 { margin: 0 0 4px; font-size: 18px; }
+  .card .role { font-size: 13px; color: var(--faint); margin: 0 0 12px; }
+  .card ul { margin: 0; padding-left: 18px; color: var(--ink-soft); font-size: 15px; }
+  .pill { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; background: var(--mono-bg); color: var(--ink-soft); border: 1px solid var(--rule); }
+
+  /* ---- annotated memory example ---- */
+  .example { position: relative; }
+  .example pre { margin: 0; }
+  .layer-tag {
+    display: inline-flex; align-items: center; gap: 8px; margin: 22px 0 6px; font-weight: 700; font-size: 14px;
+  }
+  .layer-tag .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .dot.truth { background: var(--accent); }
+  .dot.time { background: var(--accent-soft); }
+  .note { font-size: 14px; color: var(--faint); margin: 4px 0 0; }
+
+  ol.rule-steps { padding-left: 20px; margin: 0; }
+  ol.rule-steps li { margin-bottom: 8px; }
+
+  footer { padding: 40px 0 60px; color: var(--faint); font-size: 14px; }
+  footer a { color: var(--ink-soft); }
+  .kicker { color: var(--faint); font-size: 14px; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="palimpsest-bg" aria-hidden="true">store config as markdown, not sqlite · why option B is out · what "done" means for v1 · the parser reads files at boot · reversed the sqlite lean on 2026-01-19 · diff-ability over query layer · timeline is append-only · compiled_truth is rewritable · neurons that fire together wire together · the reasoning behind a decision is never erased · a change of mind stays on the record · plain markdown in the repo · outlives every session · </div>
+  <div class="wrap">
+    <div class="feather">🪶</div>
+    <h1 class="title serif">Palimpsesto</h1>
+    <p class="tagline">Project memory for coding agents that never erases the <em>why</em>.</p>
+    <p class="metaphor serif">A palimpsest is a manuscript written over an erased one, where the earlier text still shows through. The current understanding is rewritten in place — the reasoning behind it stays readable underneath.</p>
+    <div class="cta">
+      <a class="btn" href="https://github.com/jeferson-guedes/Palimpsesto">View on GitHub →</a>
+      <a class="btn ghost" href="#quickstart">Quickstart</a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>The problem</h2>
+    <p class="lead">You spend a session settling something real — why Markdown over SQLite, why option B is out, what <em>done</em> means for this version. The reasoning is good, the call is made.</p>
+    <p>Then the session ends. Open a fresh one tomorrow, switch machines, move from one agent to another — and it asks the same questions again. The model isn't weak. It just never had anywhere durable to put the conclusion. The work survives as code; the <em>why</em> evaporates into a chat log nobody reopens.</p>
+    <p>Palimpsesto gives a project a durable memory: plain Markdown that lives in the repo and outlives every session. It is <strong>convention-first</strong> — nothing to stand up before you start, no runtime, no CLI required. An agent learns how it works by reading one file.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>How a memory is shaped</h2>
+    <h3>Two layers per page</h3>
+    <p>A memory that evolves — a decision, an ongoing project, a piece of feedback — carries two layers. One keeps you moving; the other lets you trace your way back.</p>
+
+    <div class="example">
+      <div class="layer-tag"><span class="dot truth"></span> compiled_truth — rewritable</div>
+      <p class="note">The current best understanding. Rewrite it as a whole when things improve.</p>
+      <div class="layer-tag"><span class="dot time"></span> timeline — append-only</div>
+      <p class="note">How the understanding got here. You add to it; you never rewrite it.</p>
+      <pre><code>---
+name: config-storage-format
+description: Config is Markdown, not SQLite — for diff-ability and zero migrations.
+metadata:
+  type: decision
+---
+
+## compiled_truth
+Config is stored as Markdown files in the repo — diff-able in a PR,
+human-readable, no migration story. Parsed at boot; no DB dependency.
+
+## timeline
+- 2026-01-12 · hypothesis · leaned toward SQLite (atomic writes, a query API)
+- 2026-01-19 · reversal   · dropped it — config is small and read-mostly, so
+                            migrations cost more than the query layer is worth
+- 2026-01-19 · decision   · store config as Markdown, parsed at boot</code></pre>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>The one rule</h2>
+    <h3>No silent edits</h3>
+    <p>The most common way a knowledge base rots is the silent edit: someone changes the conclusion and the reasoning behind it disappears. When an understanding changes, you don't quietly overwrite it. You:</p>
+    <ol class="rule-steps">
+      <li>Rewrite <code>compiled_truth</code> to the new state.</li>
+      <li><strong>Append</strong> a <code>reversal</code> line to <code>timeline</code> saying what changed and why.</li>
+    </ol>
+    <p style="margin-top:16px">Those two happen together, every time. The change of mind stays on the record, and the path back is traceable. That single habit is the whole point — it is why the reasoning is never lost.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Two layers of memory</h2>
+    <h3>Durable files, plus recall</h3>
+    <p>The files are the source of truth. An optional semantic layer sits on top as an associative index — it answers <em>"didn't we discuss this before?"</em> even when you don't know which file it lives in.</p>
+    <div class="layers">
+      <div class="card">
+        <span class="pill">core</span>
+        <h4 style="margin-top:10px">Durable files</h4>
+        <p class="role">The source of truth</p>
+        <ul>
+          <li>Curated Markdown, <code>compiled_truth</code> + <code>timeline</code></li>
+          <li>Index read every session</li>
+          <li>Diffable in a PR, readable by a human or <code>grep</code></li>
+          <li>Stands alone — no dependencies</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="pill">optional</span>
+        <h4 style="margin-top:10px">Semantic layer</h4>
+        <p class="role">Associative recall</p>
+        <ul>
+          <li>Local ChromaDB + on-device embeddings — zero API cost</li>
+          <li>Similarity search, on demand</li>
+          <li>A Hebbian synaptic graph: co-retrieved memories wire together</li>
+          <li>Spreading activation drags in relevant neighbors</li>
+        </ul>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:18px; font-size:15px">Nothing leaves your machine, and no memory is ever committed to the repo. The store is plain files; any agent that can read them — or call an MCP tool — can use it.</p>
+  </div>
+</section>
+
+<section id="quickstart">
+  <div class="wrap">
+    <h2>Quickstart</h2>
+    <h3>Clone and wire it in</h3>
+    <p><code>setup.sh</code> is pure Bash — zero dependencies. It links the skill into your agents and, optionally, scaffolds a memory directory.</p>
+    <pre><code>git clone git@github.com:jeferson-guedes/Palimpsesto.git
+cd Palimpsesto
+
+./setup.sh                       # wire the skill into your agents (~/.claude, ~/.codex)
+./setup.sh ~/my-project/memory   # also scaffold a memory dir for a project
+./setup.sh --semantic            # also set up the optional semantic layer</code></pre>
+    <p style="margin-top:18px">From there it's just Markdown. Point your agent at <a href="https://github.com/jeferson-guedes/Palimpsesto/blob/main/PALIMPSESTO.md"><code>PALIMPSESTO.md</code></a> — the contract — and it learns the rest.</p>
+  </div>
+</section>
+
+<section class="tight">
+  <div class="wrap">
+    <h2>Not this</h2>
+    <p><strong>A rules file (CLAUDE.md / AGENTS.md).</strong> Great for standing instructions. Palimpsesto is structured, addressable knowledge with an audit trail — a different job. Use both.</p>
+    <p><strong>A vector store or hosted memory.</strong> Those are runtimes over your knowledge. Palimpsesto is the substrate: plain files in git. Put a runtime on top if you want; the knowledge still belongs to the repo.</p>
+    <p><strong>Chat history.</strong> History is the process. A memory is the conclusion — the handful of judgments you'll need again.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="kicker">Open source · MIT</p>
+    <p>Palimpsesto adapts two invariants from <a href="https://github.com/mindmuxai/brain.md">brain.md</a> (MindMux) — <code>compiled_truth</code> + append-only <code>timeline</code>, written together — and keeps them as a convention, so any agent that can read a file can use one.</p>
+    <p><a href="https://github.com/jeferson-guedes/Palimpsesto">github.com/jeferson-guedes/Palimpsesto</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
